@@ -79,6 +79,57 @@ Voir le tableau détaillé dans [TESTS.md §3](TESTS.md). Points saillants :
 | Dockerfiles | base officielle épinglée, utilisateur non-root, multi-stage frontend | conformes |
 | `.dockerignore` | exclut `node_modules`, `.venv`, `__pycache__`, `.env` | présents |
 
+### 2.5 Test du `docker-compose.yml` sans démon Docker
+
+Le binaire Docker n'existe pas dans cet environnement. Le fichier a donc été vérifié par
+`scripts/validate-compose.py`, qui reproduit l'interpolation Compose (`${VAR}`,
+`${VAR:-défaut}`, `${VAR:?message}`) et contrôle la structure complète :
+
+```text
+$ python scripts/validate-compose.py
+66/66 vérifications OK
+docker-compose.yml : structure valide (équivalent de `docker compose config`)
+```
+
+Points contrôlés : 7 services, images et contextes de build, Dockerfiles présents,
+réseaux déclarés, volumes nommés et chemins montés existants, `depends_on` +
+conditions `service_healthy` réellement adossées à un healthcheck, un seul port publié
+(nginx) et PostgreSQL jamais exposé, cohérence des `upstream` nginx avec les noms de
+services, `/healthz` exposé, absence de secret littéral, scripts et commandes de gestion
+présents. Le validateur vérifie aussi que **sans `.env`** l'erreur affichée est bien le
+message actionnable (`... creez .env avec scripts/init-secrets.bat`).
+
+### 2.6 Démarrage réel du conteneur backend (sans Docker)
+
+Le script que le conteneur exécute (`backend/entrypoint.sh`) a été lancé tel quel, avec
+les variables d'environnement résolues par Compose, sur une base PostgreSQL **vide** :
+
+```text
+[entrypoint] Démarrage du backend Django (config.settings)
+Base de données disponible.
+[entrypoint] Application des migrations...        → 38 migrations appliquées
+[entrypoint] Collecte des fichiers statiques...   → 163 fichiers
+[entrypoint] Initialisation sécurisée des comptes → Comptes créés : Ichessfinadmin (ADMIN), Emanuel (FINANCE)
+[entrypoint] Exécution : gunicorn config.wsgi:application ...
+```
+
+Puis, contre cette instance fraîchement initialisée :
+
+| Vérification | Résultat |
+|--------------|----------|
+| `/healthz` | `{"status": "ok"}` |
+| Connexion initiale `Emanuel` | `200`, `must_change_password: true` |
+| Accès aux opérations avant changement | `403` |
+| Changement de mot de passe | `200` |
+| Création de 3 opérations | `201` ×3 |
+| Balances calculées | entrées `5000.00`, sorties `1750.00`, solde `3250.00` |
+| Dashboard | `financial.balance 3250.00`, écart `null`, comparaison `UNAVAILABLE` |
+| Config bancaire (financier) | `403` |
+| Export xlsx | `200` |
+
+C'est exactement la séquence que produit `docker compose up -d` pour le service
+`backend` ; seule la couche de conteneurisation elle-même n'a pas pu être exercée ici.
+
 ## 3. Commandes à exécuter sur un hôte Docker
 
 ```bash

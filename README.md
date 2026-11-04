@@ -179,6 +179,12 @@ npm test
 npm run build
 ```
 
+Vérification de la configuration Docker sans démon :
+
+```bash
+python scripts/validate-compose.py     # 66 contrôle(s) : interpolation, réseaux, volumes…
+```
+
 Résultats de la dernière exécution : **132 tests backend** (dont 132 rejoués sur
 PostgreSQL 16) et **39 tests frontend**, tous verts. Détails et couverture dans
 [docs/TESTS.md](docs/TESTS.md).
