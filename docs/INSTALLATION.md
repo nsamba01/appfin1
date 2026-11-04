@@ -90,6 +90,22 @@ Ouvrir `http://localhost:8080` :
 2. mot de passe initial défini lors de l'initialisation ;
 3. **changement de mot de passe obligatoire** avant tout accès aux modules.
 
+### 2.7 Purger les mots de passe initiaux (après la première connexion)
+
+`bootstrap_users` est idempotent : il ne crée les comptes que s'ils n'existent pas et ne
+modifie jamais un mot de passe existant. Une fois les deux comptes créés et leurs mots de
+passe changés :
+
+```bash
+sed -i 's/^INITIAL_ADMIN_PASSWORD=.*/INITIAL_ADMIN_PASSWORD=/;
+        s/^INITIAL_FINANCE_PASSWORD=.*/INITIAL_FINANCE_PASSWORD=/' .env
+docker compose up -d backend bank-sync-worker
+```
+
+Ainsi, plus aucun mot de passe initial ne subsiste dans l'environnement des conteneurs
+ni dans `.env`. À conserver ensuite dans votre coffre-fort de secrets uniquement si votre
+procédure de reprise après sinistre l'exige.
+
 ---
 
 ## 3. HTTPS
