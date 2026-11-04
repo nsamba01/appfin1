@@ -15,6 +15,8 @@ FROM nginx:1.27-alpine AS runtime
 
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Tolérance CRLF (copie depuis un poste Windows) : nginx refuserait la conf.
+RUN sed -i 's/\r$//' /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 
 RUN chown -R nginx:nginx /usr/share/nginx/html

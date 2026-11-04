@@ -82,13 +82,18 @@ Voir le tableau détaillé dans [TESTS.md §3](TESTS.md). Points saillants :
 ## 3. Commandes à exécuter sur un hôte Docker
 
 ```bash
-cp .env.example .env && ./scripts/init-secrets.sh
+./scripts/init-secrets.sh        # Windows : scripts\init-secrets.bat
 docker compose build
 docker compose up -d
 docker compose ps
 docker compose logs -f
 docker compose --profile test run --rm backend-test
 ```
+
+Sous Windows, `scripts\start-windows.bat` enchaîne la création de `.env`, le build et le
+démarrage. Les scripts PowerShell fournis ont été validés syntaxiquement (analyse par
+grammaire PowerShell) mais n'ont pas pu être exécutés ici : l'environnement de
+construction est Linux sans PowerShell — à rejouer sur le poste Windows cible.
 
 Attendu : 5 services `running` (dont `db` et `backend` `healthy`), application sur
 `http://localhost:8080`, 132 tests verts dans le conteneur de test.

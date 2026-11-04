@@ -66,6 +66,32 @@ docker compose logs -f backend
 L'application est disponible sur **http://localhost:8080** (port configurable via
 `NGINX_HTTP_PORT`).
 
+### Windows (PowerShell / cmd)
+
+Le fichier `.env` n'est **jamais livré** (il contient des secrets) : il doit être généré
+une seule fois avant le premier `docker compose`. Sous Windows, utilisez l'assistant
+fourni — il ne demande ni Python ni Bash :
+
+```bat
+:: à la racine du projet, double-clic possible
+scripts\init-secrets.bat
+
+:: ou, en une seule étape (crée .env si besoin, construit et démarre) :
+scripts\start-windows.bat
+```
+
+Puis :
+
+```bat
+docker compose ps
+docker compose logs -f backend
+```
+
+> ⚠️ Sans `.env`, `docker compose up` s'arrête volontairement avec le message
+> `DJANGO_SECRET_KEY manquant - creez .env avec scripts/init-secrets.bat`.
+> Placez-vous bien dans le dossier qui contient `docker-compose.yml`
+> (`cd /d "D:\1 MES APP\finance\appfin1-arena-b8dc0b91-appfin1"`).
+
 ### Comptes initiaux
 
 Créés automatiquement au premier démarrage à partir des variables
@@ -182,6 +208,16 @@ docker compose exec backend python manage.py shell
 docker compose exec backend python manage.py migrate
 ./scripts/backup.sh                  # sauvegarde PostgreSQL
 ./scripts/restore.sh backups/<f>.dump
+docker compose --profile test run --rm backend-test
+```
+
+Équivalents Windows (mêmes opérations, sans Bash) :
+
+```bat
+scripts\init-secrets.bat                 :: crée/renouvelle .env
+scripts\start-windows.bat                :: .env si besoin + docker compose up -d --build
+powershell -ExecutionPolicy Bypass -File scripts\backup.ps1
+powershell -ExecutionPolicy Bypass -File scripts\restore.ps1 backups\finbank_<date>.dump
 docker compose --profile test run --rm backend-test
 ```
 

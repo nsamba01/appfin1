@@ -24,9 +24,27 @@ cd financial-management
 
 ### 2.2 Générer la configuration
 
+**Linux / macOS / WSL**
+
 ```bash
 ./scripts/init-secrets.sh
 ```
+
+**Windows (PowerShell ou cmd)** — aucune dépendance Python/Bash requise :
+
+```bat
+scripts\init-secrets.bat
+```
+
+ou directement :
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\init-secrets.ps1
+```
+
+Le script PowerShell fait exactement la même chose que la version Bash : secrets
+aléatoires cryptographiques, mots de passe initiaux saisis sans affichage, `.env` en
+UTF-8 sans BOM avec des fins de ligne LF (indispensables à Docker), droits restreints.
 
 Le script :
 
@@ -242,7 +260,10 @@ npm run build
 
 | Symptôme | Cause probable | Correction |
 |----------|----------------|------------|
+| `required variable DJANGO_SECRET_KEY is missing a value` / `POSTGRES_PASSWORD` / `FIELD_ENCRYPTION_KEY` | **le fichier `.env` n'existe pas** (il n'est jamais livré : il contient les secrets) | exécuter `scripts\init-secrets.bat` (Windows) ou `./scripts/init-secrets.sh`, puis relancer `docker compose up -d --build` |
+| `env file ... .env not found` | même cause | idem |
 | `DJANGO_SECRET_KEY est requis` | `.env` absent ou vide | `./scripts/init-secrets.sh` |
+| `[ERREUR] Docker n'est pas démarré` | Docker Desktop arrêté | démarrer Docker Desktop puis `scripts\start-windows.bat` |
 | Backend redémarre en boucle | PostgreSQL pas prêt / mauvais mot de passe | `docker compose logs db` ; vérifier `POSTGRES_*` |
 | `Invalid HTTP_HOST` | domaine absent de `DJANGO_ALLOWED_HOSTS` | l'ajouter dans `.env` puis `docker compose up -d` |
 | Erreur CSRF sur POST | origine absente de `DJANGO_CSRF_TRUSTED_ORIGINS` | ajouter `https://votre-domaine` |
