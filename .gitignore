@@ -1,0 +1,48 @@
+# --- Secrets & configuration locale -----------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+certs/*
+!certs/.gitkeep
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.sqlite3
+db.sqlite3
+backend/staticfiles/
+backend/media/
+
+# --- Node / React -----------------------------------------------------------
+node_modules/
+dist/
+.vite/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+
+# --- Docker / données -------------------------------------------------------
+pgdata/
+backups/*
+!backups/.gitkeep
+nginx_logs/
+*.dump
+*.sql
+*.zip
+
+# --- Éditeurs / OS ----------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
